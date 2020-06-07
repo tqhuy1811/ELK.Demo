@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample Page</title>
+</head>
+<body>
+    <div>
+        Hello nice to meet you
+    </div>
+    <label for="searchBox">
+        Search
+        <input id="searchBox"/>
+    </label>
+    <button onclick="search()">Search</button>
+    <script>
+        function search() {
+            const text = document.getElementById('searchBox').value;
+            const querySearch = {
+                "query": {
+                    "match": {
+                        "name": {
+                            "fuzziness": 2,
+                            "query": text
+                        }
+                    }
+                }
+            }
+            fetch("http://localhost:9200/authorbooks/_search", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(querySearch)
+            }).then(r => r.json()).then(r => {
+                const listData = r.hits.hits;
+
+                const listContainer = document.createElement('div');
+
+                const listElement = document.createElement('ul');
+                
+                document.getElementsByTagName('body')[0].appendChild(listContainer);
+                listContainer.appendChild(listElement);
+
+                for (i = 0; i < listData.length; ++i) {
+                    const listItem = document.createElement('li');
+                    
+                    listItem.innerHTML = 
+                        `Id: ${listData[i]['_source'].id}, Author: ${listData[i]['_source'].name}, Book: ${listData[i]['_source'].bookName}`;
+                    
+                    listElement.appendChild(listItem);
+                }
+            })
+            
+        }
+    </script>
+
+
+</body>
+</html>
